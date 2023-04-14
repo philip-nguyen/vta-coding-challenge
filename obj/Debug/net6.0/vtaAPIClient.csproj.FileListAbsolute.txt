@@ -1,0 +1,15 @@
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\vtaAPIClient.exe
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\vtaAPIClient.deps.json
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\vtaAPIClient.runtimeconfig.json
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\vtaAPIClient.dll
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\ref\vtaAPIClient.dll
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\bin\Debug\net6.0\vtaAPIClient.pdb
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.csproj.AssemblyReference.cache
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.AssemblyInfoInputs.cache
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.AssemblyInfo.cs
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.csproj.CoreCompileInputs.cache
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.dll
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\ref\vtaAPIClient.dll
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.pdb
+C:\Users\vietw\vta-coding-challenge\vtaAPIClient\obj\Debug\net6.0\vtaAPIClient.genruntimeconfig.cache
