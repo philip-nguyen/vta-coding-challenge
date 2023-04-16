@@ -3,6 +3,8 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes; // deserialize subsections
+using System;
+using System.Linq;
 
 namespace HelloWorld
 {
@@ -39,15 +41,50 @@ namespace HelloWorld
             // Get the entity subsection
             JsonArray tripUpdatesArr = tripNode!["entity"]!.AsArray();
 
-            int count = tripUpdatesArr.Count;
+
+            /*
+            tripUpdate in tripUpdatesArr: 
+            {
+                "id": "3286619_169_52920",
+                "tripUpdate": {
+                    "trip": {
+                    "tripId": "3286619",
+                    "startTime": "14:42:00",
+                    "startDate": "20230414",
+                    "scheduleRelationship": "SCHEDULED",
+                    "routeId": "60",
+                    "directionId": 1
+                    },
+                    "stopTimeUpdate": [...],
+                    "vehicle": {
+                    "id": "169"
+                    },
+                    "timestamp": "1681511743"
+                }
+            }
+            ** if scheduleRelationship == "CANCELLED", then there is no "stopTimeUpdate" or "vehicle" data
+
+            stopTimeUpdate in stopTimeUpdates
+            {
+                "stopSequence": 33,
+                "arrival": {
+                "time": "1681511752"
+                },
+                "stopId": "2751",
+                "scheduleRelationship": "SCHEDULED"
+            }
+            */
+            // Start DB instance
+            using var db = new TripUpdatesContext();
 
             foreach(JsonNode? tripUpdate in tripUpdatesArr)
             {
                 JsonNode tripUpdateData = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"];
                 //JsonNode tripUpdateRow = tripUpdateData
                 Console.WriteLine($"tripUpdateId : {tripUpdate["id"]}\t\tscheduleRelationship : {tripUpdateData}");
+                JsonNode stopTimeUpdates = tripUpdate["tripUpdate"]["stopTimeUpdate"]!.AsArray();
             }
-            
+            int count = tripUpdatesArr.Count;
             Console.WriteLine($"TripUpdate Count: {count}");
         }
     }
