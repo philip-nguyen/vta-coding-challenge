@@ -83,6 +83,27 @@ namespace HelloWorld
                 //JsonNode tripUpdateRow = tripUpdateData
                 Console.WriteLine($"tripUpdateId : {tripUpdate["id"]}\t\tscheduleRelationship : {tripUpdateData}");
                 JsonNode stopTimeUpdates = tripUpdate["tripUpdate"]["stopTimeUpdate"]!.AsArray();
+
+                // add tripUpdate to db
+                if(db.TripUpdates.Any(c =? c.TripUpdateId == tripUpdate["id"].ToString()))
+                {
+                    // add TripUpdate
+                }
+                db.Add(new TripUpdate {
+                    TripUpdateId = tripUpdate["id"].ToString(),
+                    TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
+                    VehicleId = tripUpdate["tripUpdate"]["trip"]["vehicle"]["id"].ToString(),
+                    TimeStamp = tripUpdate["tripUpdate"]["timestamp"].ToString()
+                });
+                db.Add(new Trip {
+                    TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
+                    StartTime = tripUpdate["tripUpdate"]["trip"]["startTime"].ToString(),
+                    StartDate = tripUpdate["tripUpdate"]["trip"]["startDate"].ToString(),
+                    ScheduleRelationship = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"].ToString(),
+                    RouteId = tripUpdate["tripUpdate"]["trip"]["routeId"].ToString(),
+                    DirectionId = tripUpdate["tripUpdate"]["trip"]["directionId"].GetValue<int>();
+                });
+                // TODO: check if there is a stopTimeUpdate, then db.Add(new StopTimeUpdate)
             }
             int count = tripUpdatesArr.Count;
             Console.WriteLine($"TripUpdate Count: {count}");
