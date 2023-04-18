@@ -41,70 +41,79 @@ namespace HelloWorld
             // Get the entity subsection
             JsonArray tripUpdatesArr = tripNode!["entity"]!.AsArray();
 
-
-            /*
-            tripUpdate in tripUpdatesArr: 
-            {
-                "id": "3286619_169_52920",
-                "tripUpdate": {
-                    "trip": {
-                    "tripId": "3286619",
-                    "startTime": "14:42:00",
-                    "startDate": "20230414",
-                    "scheduleRelationship": "SCHEDULED",
-                    "routeId": "60",
-                    "directionId": 1
-                    },
-                    "stopTimeUpdate": [...],
-                    "vehicle": {
-                    "id": "169"
-                    },
-                    "timestamp": "1681511743"
-                }
-            }
-            ** if scheduleRelationship == "CANCELLED", then there is no "stopTimeUpdate" or "vehicle" data
-
-            stopTimeUpdate in stopTimeUpdates
-            {
-                "stopSequence": 33,
-                "arrival": {
-                "time": "1681511752"
-                },
-                "stopId": "2751",
-                "scheduleRelationship": "SCHEDULED"
-            }
-            */
+            writeTripUpdatesDbContext(tripUpdatesArr);
+            
+            
+        }
+        
+        // Function to write to the DB 
+        static void writeTripUpdatesDbContext(JsonArray tripUpdatesArr)
+        {
             // Start DB instance
-            using var db = new TripUpdatesContext();
-
-            foreach(JsonNode? tripUpdate in tripUpdatesArr)
+            using (var db = new TripUpdatesContext())
             {
-                JsonNode tripUpdateData = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"];
-                //JsonNode tripUpdateRow = tripUpdateData
-                Console.WriteLine($"tripUpdateId : {tripUpdate["id"]}\t\tscheduleRelationship : {tripUpdateData}");
-                JsonNode stopTimeUpdates = tripUpdate["tripUpdate"]["stopTimeUpdate"]!.AsArray();
-
-                // add tripUpdate to db
-                if(db.TripUpdates.Any(c =? c.TripUpdateId == tripUpdate["id"].ToString()))
+                // Parse through tripUpdate nodes
+                foreach(JsonNode? tripUpdate in tripUpdatesArr)
                 {
-                    // add TripUpdate
+                    JsonNode tripUpdateData = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"];
+                    //JsonNode tripUpdateRow = tripUpdateData
+                    Console.WriteLine($"tripUpdateId : {tripUpdate["id"]}\t\tscheduleRelationship : {tripUpdateData}");
+                    
+                    
+                    // add tripUpdate to db
+                    if(!db.TripUpdates
+                        .Where(c => c.TripUpdateId == tripUpdate["id"].ToString())
+                        .ToList().Any())
+                    {
+                        //Console.WriteLine($"TripUpdateId: {tripUpdate["id"].ToString()}\nTripId: {tripUpdate["tripUpdate"]["trip"]["tripId"].ToString()}\nVehicleId: {}");
+                        // add TripUpdate
+                        if(tripUpdate["tripUpdate"]["trip"]["vehicle"] != null){
+                            db.TripUpdates.Add(new TripUpdate {
+                                TripUpdateId = tripUpdate["id"].ToString(),
+                                TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
+                                VehicleId = tripUpdate["tripUpdate"]["trip"]["vehicle"]["id"].ToString(),
+                                Timestamp = tripUpdate["tripUpdate"]["timestamp"].ToString()
+                            });
+
+                            // add the multiple stopTimeUpdates 
+                            JsonArray stopTimeUpdatesArr = tripUpdate["tripUpdate"]["stopTimeUpdate"]!.AsArray();
+
+                            foreach(JsonNode? stopTimeUpdate in stopTimeUpdatesArr) {
+                                // add StopTimeUpdate
+                                db.StopTimeUpdates.Add(new StopTimeUpdate {
+                                    TripUpdateId = tripUpdate["id"].ToString(),
+                                    StopSequence = stopTimeUpdate["stopSequence"].GetValue<int>(),
+                                    ArrivalTime = stopTimeUpdate["arrival"]["time"].ToString(),
+                                    StopId = stopTimeUpdate["stopId"].ToString(),
+                                    ScheduleRelationship = stopTimeUpdate["scheduleRelationship"].ToString()
+                                });
+                            }
+                        }
+                        else {
+                            db.TripUpdates.Add(new TripUpdate {
+                            TripUpdateId = tripUpdate["id"].ToString(),
+                            TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
+                            // no vehicle id
+                            Timestamp = tripUpdate["tripUpdate"]["timestamp"].ToString()
+                        });
+                        }
+
+                        // add Trip
+                        // trip entity is always present regardless is SCHEDULED or CANCELED
+                        db.Trips.Add(new Trip {
+                            TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
+                            StartTime = tripUpdate["tripUpdate"]["trip"]["startTime"].ToString(),
+                            StartDate = tripUpdate["tripUpdate"]["trip"]["startDate"].ToString(),
+                            ScheduleRelationship = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"].ToString(),
+                            RouteId = tripUpdate["tripUpdate"]["trip"]["routeId"].ToString(),
+                            DirectionId = tripUpdate["tripUpdate"]["trip"]["directionId"].GetValue<int>()
+                        });
+                        db.SaveChanges();
+                    }
+                    
                 }
-                db.Add(new TripUpdate {
-                    TripUpdateId = tripUpdate["id"].ToString(),
-                    TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
-                    VehicleId = tripUpdate["tripUpdate"]["trip"]["vehicle"]["id"].ToString(),
-                    TimeStamp = tripUpdate["tripUpdate"]["timestamp"].ToString()
-                });
-                db.Add(new Trip {
-                    TripId = tripUpdate["tripUpdate"]["trip"]["tripId"].ToString(),
-                    StartTime = tripUpdate["tripUpdate"]["trip"]["startTime"].ToString(),
-                    StartDate = tripUpdate["tripUpdate"]["trip"]["startDate"].ToString(),
-                    ScheduleRelationship = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"].ToString(),
-                    RouteId = tripUpdate["tripUpdate"]["trip"]["routeId"].ToString(),
-                    DirectionId = tripUpdate["tripUpdate"]["trip"]["directionId"].GetValue<int>();
-                });
-                // TODO: check if there is a stopTimeUpdate, then db.Add(new StopTimeUpdate)
             }
+            
             int count = tripUpdatesArr.Count;
             Console.WriteLine($"TripUpdate Count: {count}");
         }
