@@ -13,6 +13,17 @@ namespace HelloWorld
         // change void to async Task to allow for await GET request 
         static async Task Main(string[] args)
         {
+            // start the web application??
+            /*
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<TripUpdatesContext>(new TripUpdatesContext());
+            var app = builder.Build();
+
+            app.MapGet("/real-time/trip-updates", async (TripUpdatesContext db) =>
+                await db.TripUpdates.ToListAsync());
+
+            app.Run();
+            */
             // Use an HttpClient object to send GET Request
             using HttpClient client = new();
             client.DefaultRequestHeaders.Accept.Clear();
@@ -52,9 +63,11 @@ namespace HelloWorld
             // Start DB instance
             using (var db = new TripUpdatesContext())
             {
+                int dbWrites = 0;
                 // Parse through tripUpdate nodes
                 foreach(JsonNode? tripUpdate in tripUpdatesArr)
                 {
+                    
                     JsonNode tripUpdateData = tripUpdate["tripUpdate"]["trip"]["scheduleRelationship"];
                     //JsonNode tripUpdateRow = tripUpdateData
                     Console.WriteLine($"tripUpdateId : {tripUpdate["id"]}\t\tscheduleRelationship : {tripUpdateData}");
@@ -65,6 +78,7 @@ namespace HelloWorld
                         .Where(c => c.TripUpdateId == tripUpdate["id"].ToString())
                         .ToList().Any())
                     {
+                        dbWrites++;
                         //Console.WriteLine($"TripUpdateId: {tripUpdate["id"].ToString()}\nTripId: {tripUpdate["tripUpdate"]["trip"]["tripId"].ToString()}\nVehicleId: {}");
                         // add TripUpdate
                         if(tripUpdate["tripUpdate"]["trip"]["vehicle"] != null){
@@ -110,12 +124,15 @@ namespace HelloWorld
                         });
                         db.SaveChanges();
                     }
-                    
+                    // show how dbWrites compare to t
+                    //Console.WriteLine($"TripUpdate DB Writes:\t{dbWrites}");
                 }
+                Console.WriteLine($"TripUpdate DB Writes:\t{dbWrites}");
             }
             
             int count = tripUpdatesArr.Count;
-            Console.WriteLine($"TripUpdate Count: {count}");
+            Console.WriteLine($"TripUpdateArr Count:\t{count}");
+            
         }
     }
 }
